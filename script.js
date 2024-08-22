@@ -24,13 +24,13 @@ let openstreetmapOsm = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fast
 
 // Caminerìa WMS
 
-let camineriawms=L.tileLayer.wms('https://geoservicios.mtop.gub.uy/geoserver/inf_tte_ttelog_terrestre/v_camineria_nacional/ows?',{
+/* let camineriawms=L.tileLayer.wms('https://geoservicios.mtop.gub.uy/geoserver/inf_tte_ttelog_terrestre/v_camineria_nacional/ows?',{
     layers: "v_camineria_nacional",
     format: 'image/png',
     transparent: true,
     version: '1.3.0',
     attribution: "IDE UY"
-});
+}); */
 
 //Añadir wfs caminería nacional
 
@@ -123,9 +123,9 @@ let baseLayers = {
 };
 
 // Capas de control
-let overlayLayers = {
+/* let overlayLayers = {
     "Caminería WMS": camineriawms
-};
+}; */
 
 // Añadir el control de capas al mapa
 let controlDeCapas = L.control.layers(baseLayers, overlayLayers).addTo(map);
