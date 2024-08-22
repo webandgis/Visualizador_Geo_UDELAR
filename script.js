@@ -35,7 +35,7 @@ let camineriawms=L.tileLayer.wms('https://geoservicios.mtop.gub.uy/geoserver/inf
 //Añadir wfs caminería nacional
 
 // URL del servicio WFS
-let url_geoserver_wfs = "http://192.168.1.4:8085/geoserver/udelar_puntos/wfs?";
+let url_geoserver_wfs = "http://192.168.1.1:8085/geoserver/udelar_puntos/wfs?";
 let wfsURL = url_geoserver_wfs + "service=WFS&version=1.0.0&request=GetFeature&typeName=udelar_puntos%3Apuntos_tesis&maxFeatures=50&outputFormat=application%2Fjson";
 
 // Función para obtener datos WFS en formato GeoJSON
