@@ -174,7 +174,7 @@ fetchGeoJSON(url_geojson_file).then(data => {
 
         markers.addLayer(tesisLayer);
         overlayLayers["Tesis de Grado (Azul)"] = markers;
-        controlDeCapas.addOverlay(markers, "Tesis de Grado");
+        controlDeCapas.addOverlay(markers, "Tesis");
     }
 });
 
