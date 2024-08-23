@@ -24,19 +24,14 @@ let openstreetmapOsm = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fast
 
 // Caminerìa WMS
 
-let camineriawms=L.tileLayer.wms('https://geoservicios.mtop.gub.uy/geoserver/inf_tte_ttelog_terrestre/v_camineria_nacional/ows?',{
-    layers: "v_camineria_nacional",
-    format: 'image/png',
-    transparent: true,
-    version: '1.3.0',
-    attribution: "IDE UY"
-});
+
 
 //Añadir wfs caminería nacional
 
 // URL del servicio WFS
-let url_geoserver_wfs = "http://localhost:8085/geoserver/udelar_puntos/wfs?";
-let wfsURL = url_geoserver_wfs + "service=WFS&version=1.0.0&request=GetFeature&typeName=udelar_puntos%3Apuntos_tesis&maxFeatures=50&outputFormat=application%2Fjson";
+let url_geojson_file = 'tesis_4326.geojson';
+let url_investigaciones_file = 'investigaciones_4326.geojson';
+let url_deptos_file='deptos.geojson'
 
 // Función para obtener datos desde un archivo GeoJSON
 async function fetchGeoJSON(url) {
@@ -201,7 +196,7 @@ let baseLayers = {
 
 // Capas de control
 let overlayLayers = {
-    "Caminería WMS": camineriawms
+    "Caminería MTOP": camineriawms
 };
 
 // Añadir el control de capas al mapa
