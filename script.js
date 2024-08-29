@@ -29,9 +29,10 @@ let openstreetmapOsm = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fast
 //Añadir wfs caminería nacional
 
 // URL del servicio WFS
-let url_geojson_file = 'tesis_4326.geojson';
-let url_investigaciones_file = 'investigaciones_4326.geojson';
-let url_deptos_file='deptos.geojson'
+let url_geojson_file = 'tesis_4326_.geojson';
+let url_investigaciones_file = 'investigaciones_4326_.geojson';
+let url_centros_universitarios_file='centros_universitarios.geojson'
+let url_deptos_file = 'deptos.geojson';
 
 // Función para obtener datos desde un archivo GeoJSON
 async function fetchGeoJSON(url) {
@@ -46,25 +47,6 @@ async function fetchGeoJSON(url) {
         return null; // Devolver null en caso de error
     }
 }
-
-fetchGeoJSON(url_deptos_file).then(data => {
-    if (data) {
-        let deptosLayer = L.geoJSON(data, {
-            style: function(feature) {
-                return {
-                    fillColor: 'transparent', 
-                    weight: 0.5, 
-                    color: 'black', // Color de la línea
-                    opacity: 1.0
-                };
-            },
-            
-        });
-
-        overlayLayers["Departamentos"] = deptosLayer;
-        controlDeCapas.addOverlay(deptosLayer, "Departamentos");
-    }
-});
 
 // Función para crear un marcador con un color específico
 function createColoredMarker(latlng, color) {
@@ -89,54 +71,16 @@ function createColoredMarker(latlng, color) {
     });
 }
 
-// Obtener datos del archivo `investigaciones_4326.geojson` y agregar la capa al mapa y al control de capas
-fetchGeoJSON(url_investigaciones_file).then(data => {
-    if (data) {
-        let markers = L.markerClusterGroup();
+// Crear grupos de capas para clústeres de marcadores
+let clusterTesis = L.markerClusterGroup();
+let clusterInvestigaciones = L.markerClusterGroup();
+let clusterCentros=L.markerClusterGroup();
+let deptosLayer = L.featureGroup(); // Inicializar como L.featureGroup()
+let camineriaLayer; // Variable para la capa WMS
 
-        let investigacionesLayer = L.geoJSON(data, {
-            pointToLayer: function(feature, latlng) {
-                return L.marker(latlng, { icon: createColoredMarker(latlng, 'green') });
-            },
-            onEachFeature: function(feature, layer) {
-                let popupcontent = `
-                    <div>
-                        Código: <b>${feature.properties.codigo}</b>
-                    </div>
-                    <br>
-                    <div>
-                        Autor: <b>${feature.properties.responsabl}</b>
-                    </div>
-                    <br>
-                    <div>
-                        Financiación: <b>${feature.properties.financia}</b>
-                    </div>
-                    <br>
-                    <div>
-                        Año de publicación: <b>${feature.properties.publicacio}</b>
-                    </div>
-                    <br>
-                    <div>
-                        Título: <b>${feature.properties.titulo}</b>
-                    </div>
-                    
-                   
-                `;
-                layer.bindPopup(popupcontent, { className: 'custom-popup' });
-            }
-        });
-
-        markers.addLayer(investigacionesLayer);
-        overlayLayers["Investigaciones (Verde)"] = markers;
-        controlDeCapas.addOverlay(markers, "Investigaciones");
-    }
-});
-
-// Obtener datos del archivo `tesis_4326.geojson` y agregar la capa al mapa y al control de capas
+// Obtener datos del archivo `tesis_4326.geojson` y agregar la capa al grupo de clústeres
 fetchGeoJSON(url_geojson_file).then(data => {
     if (data) {
-        let markers = L.markerClusterGroup();
-
         let tesisLayer = L.geoJSON(data, {
             pointToLayer: function(feature, latlng) {
                 return L.marker(latlng, { icon: createColoredMarker(latlng, 'blue') });
@@ -144,63 +88,177 @@ fetchGeoJSON(url_geojson_file).then(data => {
             onEachFeature: function(feature, layer) {
                 let popupcontent = `
                     <div>
-                        Código: <b>${feature.properties.codigo}</b>
+                        Código: <b>${feature.properties.Codigo}</b>
                     </div>
                     <br>
                     <div>
-                        Autor: <b>${feature.properties.autor}</b>
+                        Autor: <b>${feature.properties.Autor}</b>
                     </div>
                     <br>
                     <div>
-                        Año de publicación: <b>${feature.properties.publicacio}</b>
+                        Año de publicación: <b>${feature.properties.Año}</b>
                     </div>
                     <br>
                     <div>
-                        Título: <b>${feature.properties.titulo}</b>
+                        Título: <b>${feature.properties.Titulo}</b>
                     </div>
                     <br>
                     <div>
-                        Tipo: <b>${feature.properties.tipo}</b>
+                        Tipo: <b>${feature.properties.Tipo}</b>
                     </div>
                     <br>
                     <div>
-                        Portada: <br>
-                        ${feature.properties.link ? `<a href="${feature.properties.link}" target="_blank"><img src="${feature.properties.img}" alt="Portada" style="width:100px;height:auto;"></a>` : `<img src="${feature.properties.img}" alt="Portada" style="width:100px;height:auto;">`}
+                        Link: <br>
+                        ${feature.properties.Link ? `<a href="${feature.properties.Link}" target="_blank"><img src="${feature.properties.img}" alt="Portada" style="width:100px;height:auto;"></a>` : `<img src="${feature.properties.img}" alt="Portada" style="width:100px;height:auto;">`}
                     </div>
                 `;
                 layer.bindPopup(popupcontent, { className: 'custom-popup' });
             }
         });
 
-        markers.addLayer(tesisLayer);
-        overlayLayers["Tesis de Grado (Azul)"] = markers;
-        controlDeCapas.addOverlay(markers, "Tesis de Grado");
+        clusterTesis.addLayer(tesisLayer);
+        clusterTesis.addTo(map)
     }
 });
 
-let camineriawms=L.tileLayer.wms('https://geoservicios.mtop.gub.uy/geoserver/inf_tte_ttelog_terrestre/v_camineria_nacional/ows?',{
-    layers: "v_camineria_nacional",
-    format: 'image/png',
-    transparent: true,
-    version: '1.3.0',
-    attribution: "IDE UY"
+// Obtener datos del archivo `investigaciones_4326.geojson` y agregar la capa al grupo de clústeres
+fetchGeoJSON(url_investigaciones_file).then(data => {
+    if (data) {
+        let investigacionesLayer = L.geoJSON(data, {
+            pointToLayer: function(feature, latlng) {
+                return L.marker(latlng, { icon: createColoredMarker(latlng, 'green') });
+            },
+            onEachFeature: function(feature, layer) {
+                let popupcontent = `
+                    <div>
+                        Código: <b>${feature.properties.Código}</b>
+                    </div>
+                    <br>
+                    <div>
+                        Autor: <b>${feature.properties.Responsabe}</b>
+                    </div>
+                    <br>
+                    <div>
+                        Financiaciación: <b>${feature.properties.Financiac}</b>
+                    </div>
+                    <br>
+                    <div>
+                        Año de publicación: <b>${feature.properties.Año}</b>
+                    </div>
+                    <br>
+                    <div>
+                        Título: <b>${feature.properties.Título}</b>
+                    </div>
+                `;
+                layer.bindPopup(popupcontent, { className: 'custom-popup' });
+            }
+        });
+
+        clusterInvestigaciones.addLayer(investigacionesLayer);
+    }
 });
+
+fetchGeoJSON(url_centros_universitarios_file).then(data => {
+    if (data) {
+        let centrosLayer = L.geoJSON(data, {
+            pointToLayer: function(feature, latlng) {
+                return L.marker(latlng, { icon: createColoredMarker(latlng, 'yellow') });
+            },
+            onEachFeature: function(feature, layer) {
+                let popupcontent = `
+                     <div>
+                        Nombre: <b>${feature.properties.NOMBRE}</b>
+                    </div>
+                    <br>
+                    <div>
+                        Departamento: <b>${feature.properties.DEPARTAMEN}</b>
+                    </div>
+                    <br>
+                    <div>
+                        Código de Localidad: <b>${feature.properties.CODLOC}</b>
+                    </div>
+                    <br>
+                    <div>
+                        Localidad/Barrio: <b>${feature.properties.LOCALIDAD}</b>
+                    </div>
+                    <br>
+                    <div>
+                        Calle: <b>${feature.properties.CALLE}</b>
+                    </div>
+                    <br>
+                    <div>
+                        Nro: <b>${feature.properties.NRO}</b>
+                    </div>
+                    <br>
+                     <div>
+                        Teléfono: <b>${feature.properties.TELEFONO}</b>
+                    </div>
+                    <br>
+                     <div>
+                       Correo: <b>${feature.properties.CORREO}</b>
+                    </div>
+                    
+                `;
+                layer.bindPopup(popupcontent, { className: 'custom-popup' });
+            }
+        });
+
+        clusterCentros.addLayer(centrosLayer);
+    }
+});
+
+// Obtener datos del archivo `deptos.geojson` y agregar la capa al mapa
+fetchGeoJSON(url_deptos_file).then(data => {
+    if (data) {
+        let deptosLayer = L.geoJSON(data, {
+            style: function(feature) {
+                return {
+                    fillColor: 'transparent', 
+                    weight: 0.5, 
+                    color: 'black', // Color de la línea
+                    opacity: 1.0
+                };
+            }
+        });
+
+       
+        deptosLayer.addTo(map);
+    }
+});
+
+
+// Función para crear la capa WMS
+function createCamineriaWMSLayer() {
+    camineriaLayer = L.tileLayer.wms('https://geoservicios.mtop.gub.uy/geoserver/inf_tte_ttelog_terrestre/v_camineria_nacional/ows?', {
+        layers: "v_camineria_nacional",
+        format: 'image/png',
+        transparent: true,
+        version: '1.3.0',
+        attribution: "IDE UY"
+    });
+
+    return camineriaLayer;
+}
+
 // Definir capas base
 let baseLayers = {
     "Mosaico IDE": ideUy,
     "Open StreetMap": openStreetmap,
-    /* "CartoDB Modo Oscuro": openstreetmapdark, */
     "Mapa base": baseMap,
     "CartoDB Light": openstreetmapOsm
 };
 
-// Capas de control
+// Definir capas de control (en el orden deseado)
 let overlayLayers = {
-    "Caminería MTOP": camineriawms
+    "Tesis de Grado": clusterTesis,
+    "Investigaciones": clusterInvestigaciones,
+    "Centros Universitarios": clusterCentros,
+    "Rutas Nacionales MTOP": createCamineriaWMSLayer() // Llama a la función para obtener la capa WMS
 };
 
-// Añadir el control de capas al mapa
+// Crear y añadir el control de capas al mapa
 let controlDeCapas = L.control.layers(baseLayers, overlayLayers).addTo(map);
+
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 
 // Mini Mapa
@@ -359,3 +417,10 @@ getWFSgeojson().then(data => {
         controlDeCapas.addOverlay(markers, "Puntos Tesis WFS (Clúster)");
     }
 });  */
+// HOVER METADATOS
+document.addEventListener('DOMContentLoaded', function () {
+    let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+})
