@@ -139,7 +139,7 @@ fetchGeoJSON(url_investigaciones_file).then(data => {
                     </div>
                     <br>
                     <div>
-                        Financiaciación: <b>${feature.properties.Financiac}</b>
+                        Financiación: <b>${feature.properties.Financiac}</b>
                     </div>
                     <br>
                     <div>
