@@ -203,9 +203,26 @@ fetchGeoJSON(url_centros_universitarios_file).then(data => {
             }
         });
 
-        markers.addLayer(tesisLayer);
-        overlayLayers["Tesis de Grado (Azul)"] = markers;
-        controlDeCapas.addOverlay(markers, "Tesis de Grado");
+        clusterCentros.addLayer(centrosLayer);
+    }
+});
+
+// Obtener datos del archivo `deptos.geojson` y agregar la capa al mapa
+fetchGeoJSON(url_deptos_file).then(data => {
+    if (data) {
+        let deptosLayer = L.geoJSON(data, {
+            style: function(feature) {
+                return {
+                    fillColor: 'transparent', 
+                    weight: 0.5, 
+                    color: 'black', // Color de la línea
+                    opacity: 1.0
+                };
+            }
+        });
+
+       
+        deptosLayer.addTo(map);
     }
 });
 
@@ -400,3 +417,10 @@ getWFSgeojson().then(data => {
         controlDeCapas.addOverlay(markers, "Puntos Tesis WFS (Clúster)");
     }
 });  */
+// HOVER
+document.addEventListener('DOMContentLoaded', function () {
+    let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+})
